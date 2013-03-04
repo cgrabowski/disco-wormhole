@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Disco Wormhole</string>
+    <string name="description">Fly through space like a disco queen!</string>
+    <string name="settings_title">Disco Wormhole Settings</string>
+    <string name="flight_speed_title">Flight Speed</string>
+    <string name="flight_speed_summary">The speed of the wormhole</string>
+        <string name="num_rings_title">Number of rings in the wormhole</string>
+    <string name="num_rings_summary">Decrease the number of rings to improve performance</string>
+    <string name="use_colors_title">Use Colors</string>
+	<string name="use_space_dust_title">Space Dust Background</string>
+    
+</resources>

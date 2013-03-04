@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:robobunny="http://robobunny.com"
+    android:key="disco_wormhole_settings"
+    android:title="@string/settings_title" >
+
+    <com.adamantine.discowormhole.and.SeekBarPreference
+        android:defaultValue="50"
+        android:key="1"
+        android:max="100"
+        android:summary="@string/flight_speed_summary"
+        android:title="@string/flight_speed_title"
+        robobunny:min="1"
+        robobunny:unitsLeft=""
+        robobunny:unitsRight="%" />
+    <com.adamantine.discowormhole.and.SeekBarPreference
+        android:defaultValue="50"
+        android:key="2"
+        android:max="200"
+        android:summary="@string/num_rings_summary"
+        android:title="@string/num_rings_title"
+        robobunny:min="25"
+        robobunny:unitsLeft=""
+        robobunny:unitsRight="" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="4"
+        android:title="@string/use_colors_title" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="8"
+        android:title="@string/use_space_dust_title" />
+
+</PreferenceScreen>
