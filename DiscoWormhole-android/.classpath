@@ -2,8 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/AdamantineLibgdxLibrary"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/DiscoWormhole"/>
+	<classpathentry exported="true" kind="lib" path="libs/gdx-backend-android.jar"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="lib" path="libs/GoogleAdMobAdsSdk-6.3.1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

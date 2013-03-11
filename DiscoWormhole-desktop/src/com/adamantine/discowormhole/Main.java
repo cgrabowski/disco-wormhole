@@ -1,6 +1,5 @@
 package com.adamantine.discowormhole;
 
-import com.adamantine.discowormhole.DiscoWormhole;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 

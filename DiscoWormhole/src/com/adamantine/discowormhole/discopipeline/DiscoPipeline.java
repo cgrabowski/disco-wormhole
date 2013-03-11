@@ -12,25 +12,27 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 public class DiscoPipeline implements FlightTranslator {
-	static final int NUM_LIGHTS = 2;
-	static final float RING_INTERVAL = 7.0f;
-	// lower values create more bends
-	static final int BEND_FREQUENCY = 5;
-	// higher values make bends sharper
-	static final float BEND_SHARPNESS = 5.0f;
-	static final int numRings_IN_BEND = 10;	
-	static final int SPEED_RANGE = 2000;
-	// MAX_SPEED must be at least 200 less than SPEED_RANGE
+	public static final int SPEED_RANGE = 1000;
 	public static final int MAX_SPEED = (SPEED_RANGE - 200);
-	static final int MAX_RINGS = 40;
-	static final int DEFAULT_NUM_RINGS = 40; // 25
-	static final boolean DEFAULT_USE_COLORS = true;
-	
-	public float speedCoef = 0.5f;
+
+	private static final boolean USE_LIGHTS = false;
+	private static final int NUM_LIGHTS = 2;
+	private static final float RING_INTERVAL = 7.0f;
+	// lower values create more bends
+	private static final int BEND_FREQUENCY = 5;
+	// higher values make bends sharper
+	private static final float BEND_SHARPNESS = 5.0f;
+	private static final int NUM_RINGS_IN_BEND = 10;
+	// MAX_SPEED must be at least 200 less than SPEED_RANGE
+	private static final int MAX_RINGS = 40;
+	private static final int DEFAULT_NUM_RINGS = 40; // 25
+	private static final boolean DEFAULT_USE_COLORS = true;
+
+	public float speedCoef = 0.9f;
 	public int speed = (int) (MAX_SPEED * speedCoef);
-	public int numRings = DEFAULT_NUM_RINGS;
+	public static int numRings = DEFAULT_NUM_RINGS;
 	public boolean useColors = DEFAULT_USE_COLORS;
-	
+
 	private final Random random;
 	private final DiscoRing[] discoRings;
 	private final float[] lightsPos;
@@ -39,8 +41,8 @@ public class DiscoPipeline implements FlightTranslator {
 	private final Matrix4 translation;
 	private final Quaternion rotation;
 	private final Quaternion slerpRot;
-	private final DiscoTile tile;
-	
+	private final RingSection ringSection;
+
 	private Vector2 vRot;
 	private float bend = -1.0f;
 	private int pointer = 0;
@@ -51,7 +53,7 @@ public class DiscoPipeline implements FlightTranslator {
 	private int bendCount = 0;
 	private float bendAngle = -1.0f;
 
-	public DiscoPipeline() {
+	public DiscoPipeline(RingSection ringSection) {
 		random = new Random();
 		discoRings = new DiscoRing[numRings];
 		lightsPos = new float[NUM_LIGHTS * 3];
@@ -61,33 +63,36 @@ public class DiscoPipeline implements FlightTranslator {
 				.setToTranslation(0.0f, 0.0f, -RING_INTERVAL);
 		rotation = new Quaternion();
 		slerpRot = new Quaternion(0.0f, 0.0f, 0.0f, 0.0f);
-		tile = new DiscoTile();
+		this.ringSection = ringSection;
 
 		for (int i = 0; i < bendAngles.length; i++) {
 			bendAngles[i] = -1.0f;
 		}
 
 		for (int j = 0; j < numRings; j++) {
-			discoRings[j] = new DiscoRing(tile, this);
+			discoRings[j] = new DiscoRing(ringSection, this);
 		}
 	}
 
-	// Every tile ring and every tile are drawn every time this method is called
+	// Every ringSection ring and every ringSection are drawn every time this
+	// method is called
 	public void render(Camera camera) {
 		time = System.currentTimeMillis();
 		// Pace resets the pipeline to its original position
-		// after moving the pipeline one TILE_INTERVAL
-		// The new tile ring will actually be drawn last, because pointer
+		// after moving the pipeline one ringSection_INTERVAL
+		// The new ringSection ring will actually be drawn last, because pointer
 		// is incremented at the end of the method
-		
+
 		// - speed + max speed
-		pace = (time % (SPEED_RANGE - speed)) / ((SPEED_RANGE - speed) / RING_INTERVAL);
+		pace = (time % (SPEED_RANGE - speed))
+				/ ((SPEED_RANGE - speed) / RING_INTERVAL);
 
 		if (oldPace > pace) {
 			// discoRings[pointer] = new DiscoRing();
 			// increment the pointer
 			pointer++;
-			// if the pointer is at the end of the tile ring array, move it to
+			// if the pointer is at the end of the ringSection ring array, move
+			// it to
 			// the beginning
 			if (pointer == numRings) {
 				pointer -= numRings;
@@ -108,23 +113,28 @@ public class DiscoPipeline implements FlightTranslator {
 				layout(discoRings[i + pointer], bendAngles, pointer, i
 						+ pointer);
 			} else {
-				layout(discoRings[i + pointer - numRings], bendAngles,
-						pointer, i + pointer);
+				layout(discoRings[i + pointer - numRings], bendAngles, pointer,
+						i + pointer);
 			}
 		}
 
 		// the method that lays out each light
-		layoutLights(lightsPos, pointer);
+		if (USE_LIGHTS) {
+			layoutLights(lightsPos, pointer);
+		}
 
 		// this draws each ring
-		for (int i = numRings - 1; i > -1; i--) {
+		int rank = 0;		
+		for (int i = 0; i > -numRings; i--) {				
 			// start drawing at pointer. Once the loop reaches the end of the
 			// array, it starts drawing from the beginning
-			if (i - pointer > -1) {
-				discoRings[i - pointer].render(camera, lightsPos);
+			if (pointer - 1 + i > - 1) {
+				discoRings[pointer - 1 + i].render(camera, rank, lightsPos);
 			} else {
-				discoRings[i - pointer + numRings].render(camera, lightsPos);
+				discoRings[pointer - 1 + i + numRings].render(camera, rank,
+						lightsPos);
 			}
+			rank++;
 		}
 		// oldPace is compared with pace to determine if the pipeline position
 		// has reset
@@ -140,7 +150,7 @@ public class DiscoPipeline implements FlightTranslator {
 			// and remains unchanged for the duration of the bend
 			// bend = 360.0f / 16.0f * (float) random.nextInt(16);
 			bend = (float) random.nextInt(360);
-		} else if (isBending == true && bendCount == numRings_IN_BEND) {
+		} else if (isBending == true && bendCount == NUM_RINGS_IN_BEND) {
 			isBending = false;
 			// When the bend is finished, the bend direction is reset to -1.0f
 			bend = -1.0f;
@@ -164,8 +174,8 @@ public class DiscoPipeline implements FlightTranslator {
 	}
 
 	// Called for each ring before that ring is rendered
-	DiscoRing layout(DiscoRing discoRing, float[] bendAngles,
-			int pointer, int rank) {
+	DiscoRing layout(DiscoRing discoRing, float[] bendAngles, int pointer,
+			int rank) {
 		discoRing.getTransform().idt();
 
 		for (int i = 0; i < rank - pointer; i++) {
@@ -187,7 +197,8 @@ public class DiscoPipeline implements FlightTranslator {
 
 			if (i == 0) {
 				slerpRot.idt();
-				rotation.slerp(slerpRot, time % (SPEED_RANGE - speed) / (float) (SPEED_RANGE - speed));
+				rotation.slerp(slerpRot, time % (SPEED_RANGE - speed)
+						/ (float) (SPEED_RANGE - speed));
 				discoRing.getTransform().rotate(rotation).mul(translation);
 			} else {
 				discoRing.getTransform().rotate(rotation).mul(translation);
@@ -229,6 +240,6 @@ public class DiscoPipeline implements FlightTranslator {
 	}
 
 	public void dispose() {
-		tile.dispose();
+		ringSection.dispose();
 	}
 }

@@ -15,9 +15,10 @@ import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 
-class DiscoTile{
-	final Matrix4 model;
-	
+public class DiscoTile implements RingSection {
+	static final float[] DEFAULT_LIGHT_POS = new float[] { 0.0f, 0.0f, -20f };
+
+	private final Matrix4 model;
 	private final ShaderProgram shader;
 	private final Matrix4 modelViewProjection;
 	private final Matrix4 modelView;
@@ -31,9 +32,10 @@ class DiscoTile{
 	// private ShapeRenderer shapes;
 
 	public DiscoTile() {
-		//G3dtToG3dConverter.convert("models/space_tile3.g3dt", "C:\\workspace\\space_tile.g3d");
-		
-		handle = Gdx.files.internal("models/space_tile3.g3d");		
+		// G3dtToG3dConverter.convert("models/space_tile3.g3dt",
+		// "C:\\workspace\\space_tile.g3d");
+
+		handle = Gdx.files.internal("models/space_tile3.g3d");
 		texture = new Texture(Gdx.files.internal("textures/glitter1.jpg"));
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		TextureManager.getInstance().bind(texture, 0);
@@ -61,17 +63,22 @@ class DiscoTile{
 	public void createModel() {
 
 	}
-	
+
+	@Override
 	public void render(Camera camera) {
-		render(camera, null);
+		render(camera, DEFAULT_LIGHT_POS);
 	}
 
+	@Override
 	public void render(Camera camera, float[] lightsPos) {
 		this.render(camera, lightsPos, 1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
+	@Override
 	public void render(Camera camera, float[] lightsPos, float red,
 			float green, float blue, float alpha) {
+
+		model.rotate(0.0f, 1.0f, 0.0f, 90.0f);
 
 		modelViewProjection.set(camera.combined).mul(model);
 		modelView.set(camera.view).mul(model);
@@ -85,8 +92,7 @@ class DiscoTile{
 			shader.setUniformMatrix("u_modelView", modelView);
 			shader.setUniformMatrix("u_modelViewProjection",
 					modelViewProjection);
-			shader.setUniformMatrix("u_normalMatrix",
-					normalMatrix);
+			shader.setUniformMatrix("u_normalMatrix", normalMatrix);
 			tileModel.render(shader);
 			shader.end();
 		} catch (Exception e) {
@@ -94,6 +100,12 @@ class DiscoTile{
 		}
 	}
 
+	@Override
+	public Matrix4 getModelMatrix() {
+		return model;
+	}
+
+	@Override
 	public void dispose() {
 		tileModel.dispose();
 		texture.dispose();

@@ -14,9 +14,10 @@ public class DiscoWormholeCamera extends PerspectiveCamera{
 		update();
 	}
 	
-	public void resize(int height, int width) {
+	public void resize(int width, int height) {
 		viewportHeight = height;
 		viewportWidth = width;
 		aspectRatio = viewportHeight / viewportWidth;
+		update();
 	}
 }
