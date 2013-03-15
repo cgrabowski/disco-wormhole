@@ -146,7 +146,7 @@ aligned: false
 additive: true
 behind: false
 - Image Path -
-C:\repos\DiscoWormhole\DiscoWormhole-android\assets\particle\glitter3.png
+C:\repos\DiscoWormhole\DiscoWormhole-android\assets\particle\glitter4.png
 
 
 red
@@ -295,7 +295,7 @@ aligned: false
 additive: true
 behind: false
 - Image Path -
-C:\repos\DiscoWormhole\DiscoWormhole-android\assets\particle\glitter3.png
+C:\repos\DiscoWormhole\DiscoWormhole-android\assets\particle\glitter4.png
 
 
 green
@@ -446,4 +446,4 @@ aligned: false
 additive: true
 behind: false
 - Image Path -
-C:\repos\DiscoWormhole\DiscoWormhole-android\assets\particle\glitter3.png
+C:\repos\DiscoWormhole\DiscoWormhole-android\assets\particle\glitter4.png

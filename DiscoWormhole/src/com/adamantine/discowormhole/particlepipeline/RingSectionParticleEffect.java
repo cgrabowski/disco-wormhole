@@ -1,7 +1,5 @@
 package com.adamantine.discowormhole.particlepipeline;
 
-import java.util.Random;
-
 import com.adamantine.particle.RenderableParticleEffect;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
@@ -11,25 +9,19 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Matrix4;
 
-public class RingSectionParticleEffect extends RenderableParticleEffect
-		implements ParticleRingSection {
+public class RingSectionParticleEffect extends RenderableParticleEffect {
 
-	// private float[] timeFactors;
-	// private int numSections;
-	private final Random random = new Random();
-	private int counter = 0;
 	private float pSpeedFactor = 225.0f;
+	private float stretchX = 0.05f, stretchY = 0.05f;
 
-	public RingSectionParticleEffect(Camera camera, String effectFile,
-			String imagesDirectory) {
-		super(effectFile, imagesDirectory);
-		for(ParticleEmitter e: getEmitters()) {
-			e.setSprite(new Sprite(new Texture(Gdx.files.internal("particle/glitter3.png"), true)));
-			e.getSprite().getTexture().setFilter(TextureFilter.MipMapLinearNearest, TextureFilter.MipMapLinearNearest);
+	public RingSectionParticleEffect(Camera camera, SpriteBatch spriteBatch,
+			Sprite sprite, String effectFile, String imagesDirectory) {
+		super(spriteBatch, effectFile, imagesDirectory);
+		for (ParticleEmitter e : getEmitters()) {
+			e.setSprite(sprite);
 		}
-		spriteBatch.setTransformMatrix(camera.view);		
+		spriteBatch.setTransformMatrix(camera.view);
 	}
 
 	// @Override
@@ -42,14 +34,9 @@ public class RingSectionParticleEffect extends RenderableParticleEffect
 	// }
 
 	@Override
-	public Matrix4 getModelMatrix() {
-		return spriteBatch.getTransformMatrix();
-	}
-
-	@Override
 	public void render(Camera camera) {
 		try {
-			spriteBatch.getTransformMatrix().scale(0.03f, 0.05f, 0.10f);
+			spriteBatch.getTransformMatrix().scale(stretchX, 1.0f, stretchY);
 			spriteBatch.getTransformMatrix().rotate(1.0f, 0.0f, 0.0f, -90.0f);
 			// spriteBatch.getTransformMatrix().rotate(0.0f, 0.0f, 0.0f,
 			// 180.0f);
@@ -100,7 +87,13 @@ public class RingSectionParticleEffect extends RenderableParticleEffect
 
 	public void setParticleSpeed(int ps) {
 		pSpeedFactor = ((float) (100 - (ps - 1)) * 4.5f) + 50f;
-		System.out.println("pSpeedFactor: " + pSpeedFactor);
+		// System.out.println("pSpeedFactor: " + pSpeedFactor);
+	}
+
+	public void setStretch(int x, int y) {
+
+		stretchX = ((float) x / 100.0f) / 2.0f + 0.04f;
+		stretchY = ((float) y / 100.0f) / 2.0f + 0.15f;
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.adamantine.discowormhole.and;
 
+import java.lang.reflect.Field;
+
 import android.annotation.TargetApi;
 import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
@@ -19,6 +21,9 @@ import com.adamantine.discowormhole.and.ColorPickerDialog.OnColorChangedListener
 public class DiscoSettings extends PreferenceActivity implements
 		SharedPreferences.OnSharedPreferenceChangeListener,
 		OnColorChangedListener {
+	public static final String TAG = "WormholePrefsChange";
+	public static final boolean SEND_CHANGES_TO_LOGCAT = true;
+	public static Field[] passerFields = null;
 	public static final int DEFAULT_COLOR_1 = 0xff7d9fff;
 	public static final int DEFAULT_COLOR_2 = 0xffff4b31;
 	public static final int DEFAULT_COLOR_3 = 0xff64ff46;
@@ -26,13 +31,19 @@ public class DiscoSettings extends PreferenceActivity implements
 	private static PreferenceActivity context;
 	private boolean honeycombOrGreater;
 	private Preference color1, color2, color3;
+	private SharedPreferences prefs;
+	private SharedPreferences.Editor editor;
 
 	public static boolean commonOnSharedPreferencesChanged(
 			SharedPreferences sharedPrefs, String key) {
-		//Log.e("DiscoSettings", "commonOnSharedPreferencesChanged called");
+		// Log.i("DiscoSettings", "commonOnSharedPreferencesChanged called");
 
 		synchronized (PreferencePasser.getLock()) {
-			if (key.equals("flight_speed")) {
+			if (key.equals("particle_stretch_x")) {
+				PreferencePasser.stretchX = sharedPrefs.getInt(key, 1);
+			} else if (key.equals("particle_stretch_y")) {
+				PreferencePasser.stretchY = sharedPrefs.getInt(key, 1);
+			} else if (key.equals("flight_speed")) {
 				PreferencePasser.flightSpeed = sharedPrefs.getInt(key, 50);
 			} else if (key.equals("num_rings")) {
 				PreferencePasser.numRings = sharedPrefs.getInt(key, 30);
@@ -43,20 +54,45 @@ public class DiscoSettings extends PreferenceActivity implements
 						true);
 			}
 			PreferencePasser.prefsChanged = true;
+
+			// WAT?
+			if (SEND_CHANGES_TO_LOGCAT) {
+				if (passerFields == null) {
+					passerFields = PreferencePasser.class.getDeclaredFields();
+				}
+				for (Field f : passerFields) {
+					try {
+						if (f.getType().equals(int.class)) {
+							Log.i(TAG,
+									f.getName() + ", "
+											+ f.getInt(PreferencePasser.class));
+						}
+					} catch (IllegalArgumentException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
+
+				}
+			}
+
 		}
 
 		return true;
 	}
 
 	private static void commonSetOnClickListeners(
-			final OnColorChangedListener colorListener, Preference... prefs) {
-		for (final Preference p : prefs) {
+			final OnColorChangedListener colorListener,
+			final SharedPreferences prefs, Preference... clickables) {
+		for (final Preference p : clickables) {
+
 			p.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 				@Override
 				public boolean onPreferenceClick(Preference preference) {
-					Log.e(p.getKey(), "onPreferenceClick");
-					new ColorPickerDialog(context, colorListener, p.getKey(),
-							0xff0000ff, 0x00ff00ff).show();
+					// Log.e(preference.getKey(), "onPreferenceClick");
+					new ColorPickerDialog(context, colorListener, prefs.getInt(
+							preference.getKey(), 0x00000000), preference
+							.getKey()).show();
 					return true;
 				}
 			});
@@ -80,7 +116,7 @@ public class DiscoSettings extends PreferenceActivity implements
 
 	@Override
 	public void onCreate(Bundle sis) {
-		DiscoWormholeService.engine.onResume();
+		//DiscoWormholeService.engine.onResume();
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(sis);
 		context = this;
@@ -123,13 +159,13 @@ public class DiscoSettings extends PreferenceActivity implements
 			editor = prefs.edit();
 			prefs.registerOnSharedPreferenceChangeListener(this);
 
-			//backgroundColor = (Preference) findPreference("background_color");
+			// backgroundColor = (Preference)
+			// findPreference("background_color");
 			color1 = (Preference) findPreference("color_one");
 			color2 = (Preference) findPreference("color_two");
 			color3 = (Preference) findPreference("color_three");
 
-			commonSetOnClickListeners(this, color1, color2,
-					color3);
+			commonSetOnClickListeners(this, prefs, color1, color2, color3);
 
 		}
 
@@ -137,30 +173,37 @@ public class DiscoSettings extends PreferenceActivity implements
 		public void onResume() {
 			super.onResume();
 
-			//GradientDrawable tmp = (GradientDrawable) getResources()
-			//		.getDrawable(R.drawable.background_color_icon);
-			//tmp.mutate();
-			//tmp.setColor(prefs.getInt("background_color", 0xff000000));
-			//backgroundColor.setIcon(tmp);
-			//Log.e("background color", prefs.getInt("background_color", -2) + "");
+			// GradientDrawable tmp = (GradientDrawable) getResources()
+			// .getDrawable(R.drawable.background_color_icon);
+			// tmp.mutate();
+			// tmp.setColor(prefs.getInt("background_color", 0xff000000));
+			// backgroundColor.setIcon(tmp);
+			// Log.e("background color", prefs.getInt("background_color", -2) +
+			// "");
 
-			GradientDrawable tmp = (GradientDrawable) getResources().getDrawable(
-					R.drawable.color_one_icon);
+			GradientDrawable tmp = (GradientDrawable) getResources()
+					.getDrawable(R.drawable.background_color_icon);
 			tmp.mutate();
 			tmp.setColor(prefs.getInt("color_one", DEFAULT_COLOR_1));
 			color1.setIcon(tmp);
 
 			tmp = (GradientDrawable) getResources().getDrawable(
-					R.drawable.color_two_icon);
+					R.drawable.background_color_icon);
 			tmp.mutate();
 			tmp.setColor(prefs.getInt("color_two", DEFAULT_COLOR_2));
 			color2.setIcon(tmp);
 
 			tmp = (GradientDrawable) getResources().getDrawable(
-					R.drawable.color_three_icon);
+					R.drawable.background_color_icon);
 			tmp.mutate();
 			tmp.setColor(prefs.getInt("color_three", DEFAULT_COLOR_3));
 			color3.setIcon(tmp);
+		}
+
+		@Override
+		public void onPause() {
+			super.onPause();
+			// Log.i("DiscoSettings", "DiscoSettings.onPause called");
 		}
 
 		@Override
@@ -171,8 +214,7 @@ public class DiscoSettings extends PreferenceActivity implements
 
 		@Override
 		public void colorChanged(String key, int color) {
-			Log.e("colorChanged", "color changed. key: " + key + ", color: "
-					+ color);
+			// Log.i("colorChanged", "color changed: " + color);
 			setIconColor(key, color);
 			editor.putInt(key, color);
 			editor.commit();
@@ -194,10 +236,23 @@ public class DiscoSettings extends PreferenceActivity implements
 
 	@SuppressWarnings("deprecation")
 	private void createLessThanHoneycomb() {
+		PreferenceManager
+				.setDefaultValues(this, R.xml.preferences_lt_11, false);
+		addPreferencesFromResource(R.xml.preferences_lt_11);
+
 		color1 = (Preference) findPreference("color_one");
 		color2 = (Preference) findPreference("color_two");
 		color3 = (Preference) findPreference("color_three");
-		commonSetOnClickListeners(this, color1, color2, color3);
+
+		// 7 - 9
+		Log.i("adapter count", "adapter count: "
+				+ getListView().getChildCount());
+
+		prefs = getPreferenceScreen().getSharedPreferences();
+		editor = prefs.edit();
+
+		prefs.registerOnSharedPreferenceChangeListener(this);
+		commonSetOnClickListeners(this, prefs, color1, color2, color3);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -230,6 +285,18 @@ public class DiscoSettings extends PreferenceActivity implements
 
 	@Override
 	public void colorChanged(String key, int color) {
+		setBackgroundColor(key, color);
+		editor.putInt(key, color);
+		editor.commit();
 		commonColorChanged(key, color);
+	}
+
+	@SuppressWarnings("deprecation")
+	private void setBackgroundColor(String key, int color) {
+		DegradedColorPreference cPref = (DegradedColorPreference) findPreference(key);
+		GradientDrawable tmp = (GradientDrawable) cPref.layout.getChildAt(0)
+				.getBackground();
+		tmp.mutate();
+		tmp.setColor(color);
 	}
 }

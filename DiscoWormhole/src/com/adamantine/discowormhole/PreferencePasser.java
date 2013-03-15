@@ -6,6 +6,8 @@ package com.adamantine.discowormhole;
 
 public class PreferencePasser {
 	public static boolean prefsChanged = false;
+	public static int stretchX;
+	public static int stretchY;
 	public static int flightSpeed;
 	public static int numRings;
 	public static int particleSpeed;

@@ -10,15 +10,16 @@ import com.badlogic.gdx.math.Vector2;
 
 public class ParticleRing {
 	public static final int NUM_SECTIONS_PER_RING = 16;
-	
+
+	public final Matrix4 transform;
+
 	private static final float ANGLE_ABOUT_RING = 360.0f / (float) NUM_SECTIONS_PER_RING;
 	private static final float RADIUS = 12.0f; // 7.3f;
 
 	private final Random random;
-	private final ParticleRingSection ringSection;
-	private final Matrix4 transform;
+	private final RingSectionParticleEffect ringSection;
 	private final Matrix4 ringSectionTranslation;
-	private final ParticleFlightTranslator flightTranslator;
+	private final ParticlePipeline flightTranslator;
 
 	private Vector2 radiusTranslation;
 	private float rotConst;
@@ -26,17 +27,18 @@ public class ParticleRing {
 	private float flareAcc;
 	private boolean hasFlightTranslator = false;
 	private boolean hasOwnModel = false;
+	private float[] rands;
 
 	public ParticleRing() {
 		this(null, null);
 	}
 
-	public ParticleRing(ParticleRingSection ringSection) {
+	public ParticleRing(RingSectionParticleEffect ringSection) {
 		this(ringSection, null);
 	}
 
-	public ParticleRing(ParticleRingSection ringSection,
-			ParticleFlightTranslator fTrans) {
+	public ParticleRing(RingSectionParticleEffect ringSection,
+			ParticlePipeline fTrans) {
 		if (fTrans != null) {
 			flightTranslator = fTrans;
 			hasFlightTranslator = true;
@@ -56,27 +58,35 @@ public class ParticleRing {
 		ringSectionTranslation = new Matrix4();
 		transform = new Matrix4();
 		radiusTranslation = new Vector2();
+
+		rands = new float[NUM_SECTIONS_PER_RING];
+		for (int i = 0; i < NUM_SECTIONS_PER_RING; i++) {
+			rands[i] = (float) random.nextInt(25) / 10.0f;
+		}
 	}
 
 	public void render(Camera camera, int rank) {
 		for (int i = 0; i < NUM_SECTIONS_PER_RING; i++) {
 			// reset model
-			ringSection.getModelMatrix().idt();
+			ringSection.spriteBatch.getTransformMatrix().idt();
 
 			if (hasFlightTranslator) {
-				ringSection.getModelMatrix()
-						.mul(flightTranslator.getFlightTranslation())
+				ringSection.spriteBatch.getTransformMatrix()
+						.mul(flightTranslator.flightTranslation)
 						.mul(transform);
 			}
-			// place the ringSection on the ring perimeter
+			// place the ringSection on the ring perimeter and add a random z
+			// translation to break up aliasing
 			radiusTranslation = com.adamantine.util.Math.getRotation(rotAngle
 					+ rotConst, RADIUS);
-			ringSection.getModelMatrix().translate(radiusTranslation.x,
-					radiusTranslation.y, 0.0f);
+			ringSection.spriteBatch.getTransformMatrix().translate(
+					radiusTranslation.x, radiusTranslation.y,
+					-rands[i]);
 
 			ringSectionTranslation.idt().setToRotation(0.0f, 0.0f, 1.0f,
 					rotAngle + rotConst + 90.0f);
-			ringSection.getModelMatrix().mul(ringSectionTranslation);
+			ringSection.spriteBatch.getTransformMatrix().mul(
+					ringSectionTranslation);
 
 			// flares the back end of the wormhole
 			// if (rank < 2) {
@@ -91,10 +101,6 @@ public class ParticleRing {
 			ringSection.render(camera);
 		}
 		rotAngle = 0.0f;
-	}
-
-	public Matrix4 getTransform() {
-		return this.transform;
 	}
 
 	public void dispose() {

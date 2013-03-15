@@ -4,12 +4,15 @@ package com.adamantine.discowormhole;
 
 import com.adamantine.discowormhole.discopipeline.DiscoPipeline;
 import com.adamantine.discowormhole.particlepipeline.ParticlePipeline;
-import com.adamantine.discowormhole.particlepipeline.ParticleRingSection;
 import com.adamantine.discowormhole.particlepipeline.RingSectionParticleEffect;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class DiscoWormhole implements ApplicationListener {
 
@@ -17,7 +20,10 @@ public class DiscoWormhole implements ApplicationListener {
 
 	private ParticlePipeline pipeline;
 	private RingSectionParticleEffect particleEffect;
-	//private float[] backgroundColor;
+	private SpriteBatch spriteBatch;
+	private Sprite sprite;
+	private Texture texture;
+	// private float[] backgroundColor;
 	private boolean isSetup = false;
 
 	@Override
@@ -25,11 +31,14 @@ public class DiscoWormhole implements ApplicationListener {
 		camera = new DiscoWormholeCamera(67, Gdx.graphics.getWidth(),
 				Gdx.graphics.getHeight());
 		camera.update();
-		particleEffect = new RingSectionParticleEffect(camera,
-				"particle/glitter9.p", "particle");
+		spriteBatch = new SpriteBatch();
+		texture = new Texture(Gdx.files.internal("particle/glitter5.png"), true);
+		sprite = new Sprite(texture);
+		sprite.getTexture().setFilter(TextureFilter.MipMapLinearNearest,
+				TextureFilter.MipMapLinearNearest);
+		particleEffect = new RingSectionParticleEffect(camera, spriteBatch,
+				sprite, "particle/glitter10.p", "particle");
 		pipeline = new ParticlePipeline(particleEffect);
-		// discoPipeline = new DiscoPipeline(new DiscoTile());
-		//backgroundColor = new float[] { 0.0f, 0.0f, 0.0f, 1.0f };
 	}
 
 	private void setup() {
@@ -59,7 +68,6 @@ public class DiscoWormhole implements ApplicationListener {
 		synchronized (PreferencePasser.getLock()) {
 			if (PreferencePasser.prefsChanged == true) {
 				configureFromPreferences();
-				PreferencePasser.prefsChanged = false;
 			}
 		}
 
@@ -83,7 +91,7 @@ public class DiscoWormhole implements ApplicationListener {
 
 		Gdx.graphics.getGL20().glClear(
 				GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		
+
 		pipeline.render(camera);
 	}
 
@@ -93,21 +101,19 @@ public class DiscoWormhole implements ApplicationListener {
 		// System.out.println("num rings: " + DiscoConfig.numRings);
 		// System.out.println("use colors: " + DiscoConfig.useColors);
 		// System.out.println("use spacedust: " + DiscoConfig.useSpaceDust);
-
+		if (PreferencePasser.numRings != pipeline.numRings) {
+			pipeline = new ParticlePipeline(particleEffect,
+					PreferencePasser.numRings);
+		}
+		particleEffect.setStretch(PreferencePasser.stretchX,
+				PreferencePasser.stretchY);
 		pipeline.speed = (int) (DiscoPipeline.MAX_SPEED * (Math
 				.sqrt((float) PreferencePasser.flightSpeed / 100.0f)));
 		particleEffect.setParticleSpeed(PreferencePasser.particleSpeed);
-		if(PreferencePasser.numRings != pipeline.numRings) {
-			pipeline = new ParticlePipeline(particleEffect, PreferencePasser.numRings);
-		}
-		//Color color = new Color();
-		//Color.rgb888ToColor(color, (PreferencePasser.backgroundColor & 0xffffff));
-		//backgroundColor[0] = color.r;
-		//backgroundColor[1] = color.g;
-		//backgroundColor[2] = color.b;
 		particleEffect.setColors(PreferencePasser.color1,
 				PreferencePasser.color2, PreferencePasser.color3);
-		System.out.println("pipe speed: " + pipeline.speed);
+		// System.out.println("pipe speed: " + pipeline.speed);
+		PreferencePasser.prefsChanged = false;
 	}
 
 	@Override
@@ -116,12 +122,16 @@ public class DiscoWormhole implements ApplicationListener {
 
 	@Override
 	public void resume() {
-		configureFromPreferences();
+		System.out.println("DiscoWormhole onResume called");
+		synchronized (PreferencePasser.getLock()) {
+			PreferencePasser.prefsChanged = true;
+		}
 	}
 
 	@Override
 	public void dispose() {
-		pipeline.dispose();
+		spriteBatch.dispose();
+		texture.dispose();
 		System.out.println("DiscoWormhole.dispose() called");
 	}
 

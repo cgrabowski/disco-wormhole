@@ -11,10 +11,10 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
-public class ParticlePipeline implements ParticleFlightTranslator {
+public class ParticlePipeline{
 	public static final int SPEED_RANGE = 1000;
 	public static final int MAX_SPEED = (SPEED_RANGE - 200);
-	private static final float RING_INTERVAL = 7.0f;
+	public static final float RING_INTERVAL = 7.0f;
 	// lower values create more bends
 	private static final int BEND_FREQUENCY = 5;
 	// higher values make bends sharper
@@ -27,17 +27,17 @@ public class ParticlePipeline implements ParticleFlightTranslator {
 
 	public float speedCoef = 1.0f;
 	public int speed = (int) (MAX_SPEED * speedCoef);
-	public static int numRings = DEFAULT_NUM_RINGS;
+	public int numRings = DEFAULT_NUM_RINGS;
 	public boolean useColors = DEFAULT_USE_COLORS;
-
+	public final Matrix4 flightTranslation;
+	
 	private final Random random;
 	private final ParticleRing[] particleRings;
 	private final float[] bendAngles;
-	private final Matrix4 flightTranslation;
 	private final Matrix4 translation;
 	private final Quaternion rotation;
 	private final Quaternion slerpRot;
-	private final ParticleRingSection ringSection;
+	private final RingSectionParticleEffect ringSection;
 
 	private Vector2 vRot;
 	private float bend = -1.0f;
@@ -49,12 +49,12 @@ public class ParticlePipeline implements ParticleFlightTranslator {
 	private int bendCount = 0;
 	private float bendAngle = -1.0f;
 	
-	public ParticlePipeline(ParticleRingSection ringSection) {
-		this(ringSection, numRings);
+	public ParticlePipeline(RingSectionParticleEffect ringSection) {
+		this(ringSection, DEFAULT_NUM_RINGS);
 	}
 	
-	public ParticlePipeline(ParticleRingSection ringSection, int numRings) {
-		ParticlePipeline.numRings = numRings;
+	public ParticlePipeline(RingSectionParticleEffect ringSection, int numRings) {
+		this.numRings = numRings;
 		//ringSection.setNumSections(numRings * ParticleRing.NUM_SECTIONS_PER_RING);
 		random = new Random();
 		particleRings = new ParticleRing[numRings];
@@ -171,7 +171,7 @@ public class ParticlePipeline implements ParticleFlightTranslator {
 	// Called for each ring before that ring is rendered
 	ParticleRing layout(ParticleRing discoRing, float[] bendAngles,
 			int pointer, int rank) {
-		discoRing.getTransform().idt();
+		discoRing.transform.idt();
 
 		for (int i = 0; i < rank - pointer; i++) {
 			if (i + pointer < bendAngles.length) {
@@ -194,17 +194,12 @@ public class ParticlePipeline implements ParticleFlightTranslator {
 				slerpRot.idt();
 				rotation.slerp(slerpRot, time % (SPEED_RANGE - speed)
 						/ (float) (SPEED_RANGE - speed));
-				discoRing.getTransform().rotate(rotation).mul(translation);
+				discoRing.transform.rotate(rotation).mul(translation);
 			} else {
-				discoRing.getTransform().rotate(rotation).mul(translation);
+				discoRing.transform.rotate(rotation).mul(translation);
 			}
 		}
 		return discoRing;
-	}
-
-	@Override
-	public Matrix4 getFlightTranslation() {
-		return flightTranslation;
 	}
 
 	public void dispose() {

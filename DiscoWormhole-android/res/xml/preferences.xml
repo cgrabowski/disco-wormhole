@@ -3,13 +3,36 @@
     xmlns:robobunny="http://robobunny.com"
     android:key="disco_wormhole_settings" >
 
-    <com.adamantine.discowormhole.and.AdPreference android:layout="@layout/ad_layout" />
+    <com.adamantine.discowormhole.and.AdPreference
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:key="ad" />
 
     <Preference
         android:key="title"
         android:summary="@string/settings_summary"
         android:title="@string/settings_title" />
 
+    <com.adamantine.discowormhole.and.SeekBarPreference
+        android:defaultValue="1"
+        android:key="particle_stretch_x"
+        android:max="100"
+        android:progressDrawable="@drawable/seek_bar_progress"
+        android:summary="@string/particle_stretch_x_summary"
+        android:title="@string/particle_stretch_x_title"
+        robobunny:min="1"
+        robobunny:unitsLeft=""
+        robobunny:unitsRight="%" />
+    <com.adamantine.discowormhole.and.SeekBarPreference
+        android:defaultValue="1"
+        android:key="particle_stretch_y"
+        android:max="100"
+        android:progressDrawable="@drawable/seek_bar_progress"
+        android:summary="@string/particle_stretch_y_summary"
+        android:title="@string/particle_stretch_y_title"
+        robobunny:min="1"
+        robobunny:unitsLeft=""
+        robobunny:unitsRight="%" />
     <com.adamantine.discowormhole.and.SeekBarPreference
         android:defaultValue="50"
         android:key="flight_speed"
@@ -46,30 +69,19 @@
         android:title="@string/colors_title" >
     </Preference>
     <Preference
-        android:defaultValue="blah"
+        android:defaultValue="0xff7d9fff"
         android:key="color_one"
-        android:title="@string/color_one" >
-    </Preference>
+        android:title="@string/color_one" />
     <Preference
-        android:defaultValue="blah"
+        android:defaultValue="0xffff4b31"
         android:key="color_two"
-        android:title="@string/color_two" >
-    </Preference>
+        android:title="@string/color_two" />
     <Preference
-        android:defaultValue="blah blah"
+        android:defaultValue="0xff64ff46"
         android:key="color_three"
-        android:title="@string/color_three" >
-    </Preference>
-
-    <CheckBoxPreference
-        android:defaultValue="true"
-        android:key="use_space_dust"
-        android:title="@string/use_space_dust_title" />
-
+        android:title="@string/color_three" />
     <Preference
         android:key="spacer"
         android:title="@string/single_space" />
-    <Preference>
-    </Preference>
 
 </PreferenceScreen>
