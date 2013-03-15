@@ -161,7 +161,7 @@ public class SeekBarPreference extends Preference implements
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress,
 			boolean fromUser) {
-		//Log.i("SeekBarPreference", "onProgressChanged called");
+		// Log.i("SeekBarPreference", "onProgressChanged called");
 		int newValue = progress + mMinValue;
 
 		if (newValue > mMaxValue)
@@ -179,6 +179,10 @@ public class SeekBarPreference extends Preference implements
 
 		// change accepted, store it
 		mCurrentValue = newValue;
+		if (!getKey().equals("num_rings")) {
+			Log.i("SeekBarPreference", "value persisted onPregressChanged");
+			persistInt(mCurrentValue);
+		}
 	}
 
 	@Override
@@ -187,7 +191,7 @@ public class SeekBarPreference extends Preference implements
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
-		//Log.i("SeekBarPreference", "onStopTrackingTouch called");
+		// Log.i("SeekBarPreference", "onStopTrackingTouch called");
 		mStatusText.setText(String.valueOf(mCurrentValue));
 		persistInt(mCurrentValue);
 		notifyChanged();
