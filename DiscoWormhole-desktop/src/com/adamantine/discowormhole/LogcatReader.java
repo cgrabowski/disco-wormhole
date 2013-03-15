@@ -12,7 +12,7 @@ public class LogcatReader implements Runnable {
 	LogcatReader() {
 		sc = new Scanner(System.in);
 		t = new Thread(this, "scanner thread");
-		System.out.println("enter something");
+		System.out.println("Logcat Reader Active");
 		t.start();
 	}
 
