@@ -1,0 +1,85 @@
+# Temporary Files
+*~
+.*.swp
+.DS_STORE
+
+bin/
+target/
+obj/
+.gwt/
+gwt-unitCache/
+war/
+gen/
+armeabi/
+armeabi-v7a/
+linux32/
+linux64/
+windows32/
+windows64/
+macosx32/
+ios32/
+Debug/
+Release/
+x64/
+ipch/
+/dist
+
+*.a
+*.dll
+*.dll.mdb
+*.userprefs
+*.sdf
+*.class
+
+libgdx-*.zip
+
+#core & extension libs/ folders that have no 3rd party dependencies in them
+/gdx/libs
+/backends/gdx-backend-jglfw/libs/
+/extensions/gdx-audio/libs/
+/extensions/gdx-bullet/libs/
+/extensions/gdx-controllers/gdx-controllers-desktop/libs/
+/extensions/gdx-freetype/libs/
+/extensions/gdx-image/libs/
+
+# and2
+nightly/libs
+bitz/data/*
+
+ignore/*
+
+.DS_Store
+*/.DS_Store
+**/**/.DS_Store
+
+.metadata
+*/.metadata
+
+*/bin/**
+*/tmp/**
+*/tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+RemoteSystemsTempFiles/
+
+# android specific
+# */gen/*   ### we want these!
+*/bin
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated GUI files
+*R.java
+
+### eclipse files we DO want
+# local.properties
+# */.loadpath
+# classpath
+# settings
